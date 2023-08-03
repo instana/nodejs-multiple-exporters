@@ -1,0 +1,2 @@
+com.instana.plugin.opentelemetry:
+  enabled: true

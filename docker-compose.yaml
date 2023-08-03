@@ -1,0 +1,31 @@
+version: "3"
+services:
+
+  app:
+    build:
+      context: .
+    environment:
+      OTEL_EXPORTER_OTLP_ENDPOINT_1: ${OTEL_EXPORTER_OTLP_ENDPOINT_1:-http://agent:4317}
+      INSTANA_AGENT_KEY: ${agent_key_2:?No agent key provided}
+      INSTANA_ENDPOINT_URL: ${instana_endpoint_url:?No Instana endpoint URL provided}
+    ports:
+      - "${APP_PORT:-8080}:${APP_PORT:-8080}"
+
+  agent:
+    image: icr.io/instana/agent:latest
+    pid: "host"
+    privileged: true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /dev:/dev
+      - /sys:/sys
+      - /var/log:/var/log
+      - ./agent/logs:/opt/instana/agent/data/log
+      - ./agent/configuration-otel.yaml:/opt/instana/agent/etc/instana/configuration-otel.yaml
+    environment:
+      - INSTANA_AGENT_ENDPOINT=${agent_endpoint:?No agent endpoint provided}
+      - INSTANA_AGENT_ENDPOINT_PORT=${agent_endpoint_port:-443}
+      - INSTANA_AGENT_KEY=${agent_key_1:?No agent key provided}
+      - INSTANA_AGENT_ZONE=${agent_zone:-otel-multipe-exporter-demo}
+    expose:
+      - "42699"
